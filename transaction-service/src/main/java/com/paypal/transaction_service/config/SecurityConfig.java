@@ -15,12 +15,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/transaction/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/transactions/**", "/auth/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .anonymous(anonymous -> anonymous.disable()); // Try disabling anonymous if needed
-
+                );
         return http.build();
     }
 

@@ -15,10 +15,10 @@ public class Transaction {
     private Long id;
 
     @Column(name="sender_name" , nullable=false)
-    private String senderName;
+    private Long senderId;
 
     @Column(name = "receiver_name", nullable=false)
-    private String receiverName;
+    private Long receiverId;
 
     @Column(nullable=false)
     private Double amount;
@@ -41,6 +41,6 @@ public class Transaction {
 
     @Override
     public String toString(){
-        return "Transaction [id=" + id + ", senderName=" + senderName + ", receiverName=" + receiverName;
+        return "Transaction [id=" + id + ", senderName=" + senderId + ", receiverName=" + receiverId + ", amount=" + amount + ", timestamp=" + timestamp + ", status=" + status + "]";
     }
 }
