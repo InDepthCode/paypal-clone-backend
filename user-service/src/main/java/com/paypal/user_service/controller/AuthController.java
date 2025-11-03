@@ -47,6 +47,7 @@ public class AuthController {
         user.setName(signupRequest.getName());
         user.setRole("ROLE_USER");
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+
         System.out.println("Signup endpoint hit!");
         System.out.println("Request details:");
         System.out.println("Name: " + signupRequest.getName());
