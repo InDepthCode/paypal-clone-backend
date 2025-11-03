@@ -1,0 +1,10 @@
+{
+  "configurations": [
+    {
+      "type": "maven",
+      "name": "Run user-service",
+      "workingDir": "user-service",
+      "tasks": ["spring-boot:run"]
+    }
+  ]
+}
