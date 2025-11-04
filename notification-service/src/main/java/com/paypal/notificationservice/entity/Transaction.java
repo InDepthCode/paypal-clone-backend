@@ -1,4 +1,4 @@
-package com.paypal.transaction_service.entity;
+package com.paypal.notificationservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -11,9 +11,9 @@ import java.time.LocalDate;
 
 @Getter
 @Entity
+@Data
 @Table(name = "transaction")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
 public class Transaction {
 
     // Getters and setters
