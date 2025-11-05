@@ -2,6 +2,7 @@ package com.paypal.transaction_service.service;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.paypal.transaction_service.dto.TransferRequest;
 import com.paypal.transaction_service.entity.Transaction;
 import com.paypal.transaction_service.kafka.KafkaEventProducer;
 import com.paypal.transaction_service.repository.TransactionRepository;
@@ -24,7 +25,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction createTransaction(Transaction request) {
+    public Transaction createTransaction(TransferRequest request) {
+
+           /*
+            Controller passes a DTO (TransferRequest) to the service.
+            The service creates a new Transaction entity from that DTO.
+            Then the same entity (Transaction) is saved and sent to Kafka.
+
+            */
         Long senderId = request.getSenderId();
         Long receiverId = request.getReceiverId();
         Double amount = request.getAmount();
@@ -39,8 +47,8 @@ public class TransactionServiceImpl implements TransactionService {
          Transaction saved =  transactionRepository.save(transaction);
 
          try{
-            String eventPayload = objectMapper.writeValueAsString(saved);
-            String key = String.valueOf(saved.getId());
+             String eventPayload = objectMapper.writeValueAsString(saved);
+             String key = String.valueOf(saved.getId());
             kafkaEventProducer.sendTransactionEvent(key, saved);
             System.out.println("kafka message event");
          }

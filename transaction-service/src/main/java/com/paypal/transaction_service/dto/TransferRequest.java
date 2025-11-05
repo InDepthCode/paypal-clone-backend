@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class TransferRequest {
 
-    private String senderName;
-    private String receiverName;
+    private Long senderId;
+    private Long receiverId;
     private Double amount;
 }

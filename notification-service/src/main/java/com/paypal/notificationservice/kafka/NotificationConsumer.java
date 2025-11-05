@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paypal.notificationservice.entity.Notification;
-import com.paypal.notificationservice.entity.Transaction;
+//import com.paypal.notificationservice.entity.Transaction;
+
+import com.paypal.transaction_service.entity.Transaction ;
+
+
 
 import com.paypal.notificationservice.repository.NotificationRepository;
 import org.springframework.kafka.annotation.KafkaListener;
