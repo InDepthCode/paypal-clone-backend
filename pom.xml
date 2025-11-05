@@ -12,7 +12,7 @@
         <module>user-service</module>
         <module>transaction-service</module>
         <module>notification-service</module>
-<!--        <module>reward-service</module>-->
+        <module>reward-service</module>
 <!--        <module>api-gateway</module>-->
 <!--        <module>wallet-service</module>-->
 
