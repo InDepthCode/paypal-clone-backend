@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
@@ -32,45 +33,52 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         // cleaning of the path that we got
         String normalizedPath = path.replaceAll("/+$","");
 
+        System.out.println("Incoming request path: " + normalizedPath);
+
         // if any route is on public path it will automatically route without authorization
-        if(PUBLIC_PATHS.contains(normalizedPath)) {
-            return chain.filter(exchange)
-                    .doOnSubscribe(s -> System.out.println("Proceeding without check"))
-                    .doOnSuccess(v -> System.out.println("successfully passed"))
-                    .doOnError(e -> System.err.println("error occured"));
+        if(PUBLIC_PATHS.contains(normalizedPath) || normalizedPath.startsWith("/auth/")) {
+            System.out.println("Public path, skipping auth check: " + normalizedPath);
+            return chain.filter(exchange);
 
         }
 
         // but if its not on public path then we are checking the authorization here
         // First we are extracting Autharization header from the request
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        System.out.println("Authorization header: " + authHeader);
 
        // if auth header doesnot starts with bearer then we simply return its unauthorized
-        if(!authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("❌ Missing or invalid Authorization header");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
 
         // if header starts with bearer then we are proceeding
-        try{
-            // now extracting the  token from header
+        try {
             String token = authHeader.substring(7);
             Claims claims = JwtUtil.validateToken(token);
 
-            // we are checking if the token is valid then if its validated then
-            exchange.getRequest().mutate()
-                    .header("X-User-Email", claims.getSubject())
+            System.out.println("✅ Token validated. Claims:");
+            System.out.println("   userId=" + claims.get("userId"));
+            System.out.println("   email=" + claims.getSubject());
+            System.out.println("   role=" + claims.get("role"));
+
+            // Mutate request with claims
+            ServerWebExchange mutatedExchange = exchange.mutate()
+                    .request(exchange.getRequest().mutate()
+                            .header("X-User-Email", claims.getSubject())
+                            .header("X-User-Id", String.valueOf(claims.get("userId")))
+                            .header("X-User-Role", (String) claims.get("role"))
+                            .build())
                     .build();
 
-            // we allow routing to the desired location
-            return chain.filter(exchange)
-                    .doOnSubscribe(s -> System.out.println("Proceeding without check"))
-                    .doOnSuccess(v -> System.out.println("successfully passed"))
-                    .doOnError(e -> System.err.println("error occured"));
-        }
-        catch(Exception e) {
+            return chain.filter(mutatedExchange);
+
+        } catch (Exception e) {
+            System.out.println("❌ JWT validation failed: " + e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -79,7 +87,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return 0;
+        return -100;
     }
 
 }

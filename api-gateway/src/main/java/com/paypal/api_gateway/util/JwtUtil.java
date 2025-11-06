@@ -5,7 +5,10 @@ import java.security.Key;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class JwtUtil {
 
     private static final String SECRET = "secret123secret123secret123secret123secret123secret123";
