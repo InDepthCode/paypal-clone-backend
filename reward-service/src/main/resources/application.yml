@@ -1,5 +1,5 @@
 server:
-  port: 8089 # Reward service port
+  port: 8085 # Reward service port
 
 spring:
   application:
