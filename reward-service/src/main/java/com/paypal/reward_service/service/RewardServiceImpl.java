@@ -15,8 +15,6 @@ public class RewardServiceImpl implements RewardService{
 
 
 
-
-
     @Override
     public Reward sendReward(Reward reward) {
         reward.setSentAt(LocalDateTime.now());

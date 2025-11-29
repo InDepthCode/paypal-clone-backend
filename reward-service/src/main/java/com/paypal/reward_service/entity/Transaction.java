@@ -1,32 +1,19 @@
 package com.paypal.reward_service.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-
-@Getter
-@Entity
-@Table(name = "transaction")
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Data
 public class Transaction {
 
-    // Getters and setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter
     @Column(nullable = false)
     private Long senderId;
 
-    @Setter
     @Column(nullable = false)
     private Long receiverId;
 
@@ -34,26 +21,76 @@ public class Transaction {
     @Column(nullable = false)
     private Double amount;
 
-    @Setter
     @Column(nullable = false)
-    private LocalDate timestamp;
+    private LocalDateTime timestamp;
 
-    @Setter
     @Column(nullable = false)
     private String status;
 
     public Transaction() {}
 
-
+    public Transaction(Long senderId, Long receiverId,
+                       String senderNameSnapshot, String receiverNameSnapshot,
+                       Double amount, LocalDateTime timestamp, String status) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.amount = amount;
+        this.timestamp = timestamp;
+        this.status = status;
+    }
 
     @PrePersist
     public void prePersist() {
         if (timestamp == null) {
-            timestamp = LocalDate.now();
+            timestamp = LocalDateTime.now();
         }
         if (status == null) {
             status = "PENDING";
         }
+    }
+
+    // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getSenderId() {
+        return senderId;
+    }
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
+    }
+
+    public Long getReceiverId() {
+        return receiverId;
+    }
+    public void setReceiverId(Long receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -68,3 +105,4 @@ public class Transaction {
                 '}';
     }
 }
+

@@ -1,32 +1,36 @@
 package com.paypal.transaction_service.controller;
 
-import com.paypal.transaction_service.dto.TransferRequest;
+
 import com.paypal.transaction_service.entity.Transaction;
 import com.paypal.transaction_service.service.TransactionService;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/transactions")
+@RequestMapping("/api/transactions/")
 public class TransactionController {
+    private final TransactionService service;
 
-    private TransactionService transactionService;
-    public TransactionController(TransactionService transactionService) {
-        this.transactionService = transactionService;
+    public TransactionController(TransactionService service) {
+        this.service = service;
     }
-
     @PostMapping("/create")
-    public ResponseEntity<?> createTransaction(@RequestBody TransferRequest request) {
-        Transaction created = transactionService.createTransaction(request);
+    public ResponseEntity<?> create(@Valid @RequestBody Transaction transaction) {
+
+        Transaction created = service.createTransaction(transaction);
         return ResponseEntity.ok(created);
     }
 
     @GetMapping("/all")
-    public List<?> getAll(){
-        return transactionService.getAllTransactions();
+    public List<Transaction> getAll() {
+        return service.getAllTransactions();
     }
+
+
 
 }

@@ -1,68 +1,85 @@
 package com.paypal.transaction_service.service;
 
-
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.transaction_service.dto.TransferRequest;
 import com.paypal.transaction_service.entity.Transaction;
 import com.paypal.transaction_service.kafka.KafkaEventProducer;
 import com.paypal.transaction_service.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository transactionRepository;
+    private final TransactionRepository repository;
     private final ObjectMapper objectMapper;
     private final KafkaEventProducer kafkaEventProducer;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, ObjectMapper objectMapper, KafkaEventProducer kafkaEventProducer) {
-        this.transactionRepository = transactionRepository;
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public TransactionServiceImpl(TransactionRepository repository,
+                                  KafkaEventProducer kafkaEventProducer,
+                                  ObjectMapper objectMapper) {
+        this.repository = repository;
         this.objectMapper = objectMapper;
         this.kafkaEventProducer = kafkaEventProducer;
     }
 
+
+
     @Override
-    public Transaction createTransaction(TransferRequest request) {
+    public Transaction createTransaction(Transaction request) {
+        System.out.println("🚀 Entered createTransaction()");
 
-           /*
-            Controller passes a DTO (TransferRequest) to the service.
-            The service creates a new Transaction entity from that DTO.
-            Then the same entity (Transaction) is saved and sent to Kafka.
-
-            */
         Long senderId = request.getSenderId();
         Long receiverId = request.getReceiverId();
         Double amount = request.getAmount();
+
+
+
 
         Transaction transaction = new Transaction();
         transaction.setSenderId(senderId);
         transaction.setReceiverId(receiverId);
         transaction.setAmount(amount);
-        transaction.setTimestamp(LocalDate.now());
+        transaction.setTimestamp(LocalDateTime.now());
         transaction.setStatus("SUCCESS");
 
-         Transaction saved =  transactionRepository.save(transaction);
+        System.out.println("📥 Incoming Transaction object: " + transaction);
 
-         try{
-             String eventPayload = objectMapper.writeValueAsString(saved);
+        Transaction saved = repository.save(transaction);
+        System.out.println("💾 Saved Transaction from DB: " + saved);
+
+        try {
+//            String eventPayload = objectMapper.writeValueAsString(saved);
+//            String key = String.valueOf(saved.getId());
+//            kafkaEventProducer.sendTransactionEvent(key, eventPayload);
+
              String key = String.valueOf(saved.getId());
-            kafkaEventProducer.sendTransactionEvent(key, saved);
-            System.out.println("kafka message event");
-         }
-         catch(Exception e){
-            System.err.println("Failed to send transaction event" + e.getMessage());
+             kafkaEventProducer.sendTransactionEvent(key, saved); // send actual object!
+
+            System.out.println("🚀 Kafka message sent");
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send Kafka event: " + e.getMessage());
             e.printStackTrace();
-         }
+        }
 
-         return saved;
-
+        return saved;
     }
 
     @Override
     public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+        return repository.findAll();
     }
+
 }
